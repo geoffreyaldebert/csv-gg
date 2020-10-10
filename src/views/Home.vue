@@ -1,6 +1,6 @@
 <template>
     <div>
-
+            <br/><br/>
             <b-form-select v-model="schemaName" :options="options">
                 <template slot="first">
                   <option :value="null" disabled>Choisissez un schéma</option>
