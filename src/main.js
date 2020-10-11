@@ -8,6 +8,9 @@ import 'vue-loading-overlay/dist/vue-loading.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(Loading)

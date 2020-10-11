@@ -1,20 +1,23 @@
 <template>
     <div>
       <div v-if="lines.length > 0" class="my-4">
-          <b-table striped hover :items="items" :fields="fields">
-              <template slot="actions" slot-scope="row">
-                  <b-button size="sm" variant="danger" @click="deleteLine(row.index)" class="mr-1">
-                      Supprimer
-                  </b-button>
-                </template>
-          </b-table>
-          <b-button :href="csvLink" :download="filename" type="button" variant="primary" class="mr-2">Télécharger le CSV</b-button>
-          <b-button @click.prevent="addLine" :disabled="addingLine" type="button" variant="primary">Ajouter une ligne</b-button>
+        Enregistré !
+        <b-form @submit.prevent="reloadPage" novalidate class="my-4">
+            <div ref="container"></div>
+            <b-button type="submit" variant="primary" :disabled="!hasValues">Autre ligne</b-button>
+        </b-form>
       </div>
-      <b-form @submit.prevent="submit" v-show="addingLine" novalidate class="my-4">
-          <div ref="container"></div>
-          <b-button type="submit" variant="primary" :disabled="!hasValues">Valider la ligne</b-button>
-      </b-form>
+
+
+      <div v-if="schema && schema.location && schema.location === true">
+        <Map :lon="lon" :lat="lat" v-on:childToParent="onMarkerMoved"></Map>
+      </div>
+      <div>
+        <b-form @submit.prevent="submit" v-show="addingLine" novalidate class="my-4">
+            <div ref="container"></div>
+            <b-button type="submit" variant="primary" :disabled="!hasValues">Valider la ligne</b-button>
+        </b-form>
+      </div>
     </div>
 </template>
 
@@ -22,14 +25,18 @@
 import Vue from 'vue'
 import StringField from '@/components/StringField.vue'
 import SelectField from '@/components/SelectField.vue'
+import MultiSelectField from '@/components/MultiSelectField.vue'
 import RadioField from '@/components/RadioField.vue'
 import { EventBus } from '@/event-bus.js';
+import Map from '@/components/Map.vue';
 
 const VALIDATA_API_URL = process.env.VUE_APP_VALIDATA_API_URL
 
 export default {
   name: 'schemaForm',
-  components: {},
+  components: {
+      Map,
+  },
   props: {
       schemaMeta: Object,
       schemaName: String,
@@ -46,6 +53,8 @@ export default {
           addingLine: true,
           hasValues: false,
           fieldNodes: [],
+          lat: 48.853,
+          lon: 2.35
       }
   },
   watch: {
@@ -163,6 +172,7 @@ export default {
       },
       addField(field) {
           const hasEnum = field.constraints && field.constraints.enum
+          const hasMultiEnum = field.multiEnum && field.multiEnumList
           const isBoolean = field.type === "boolean"
 
           const factory = (klass, field) => {
@@ -176,6 +186,8 @@ export default {
             return factory(SelectField, field)
           } else if (isBoolean) {
             return factory(RadioField, field)
+          } else if (hasMultiEnum){
+              return factory(MultiSelectField,field)
           }
           return factory(StringField, field)
       },
@@ -199,6 +211,17 @@ export default {
       },
       submit() {
           let loader = this.$loading.show();
+
+          const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({"schema-name":this.schema.name,"values":this.values})
+          };
+          
+          fetch("http://localhost:4242/form", requestOptions)
+            .then(response => response.json())
+
+
           fetch(`${VALIDATA_API_URL}/validate`, {
               method: 'POST',
               body: this.buildFormData()
@@ -222,6 +245,8 @@ export default {
           }).finally(() => {
               loader.hide()
           })
+
+
       },
       addLine() {
           this.addingLine = true
@@ -233,7 +258,16 @@ export default {
           if (this.lines.length === 0) {
               this.addLine()
           }
-      }
+      },
+      reloadPage(){
+        window.location.reload()
+      },
+    
+      onMarkerMoved (value) {
+        this.values['latitude'] = value[0]
+        this.values['longitude'] = value[1]
+        this.computeHasValues()
+      },
   }
 }
 </script>
