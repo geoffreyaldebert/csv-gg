@@ -35,6 +35,7 @@ import { EventBus } from '@/event-bus.js';
 import Map from '@/components/Map.vue';
 
 const VALIDATA_API_URL = process.env.VUE_APP_VALIDATA_API_URL
+const BACKEND_URL = process.env.VUE_APP_BACKEND_URL
 
 export default {
   name: 'schemaForm',
@@ -228,8 +229,8 @@ export default {
                 method: "POST",
                 body: formData
             };
-            
-            fetch("http://localhost:4242/file", requestOptionsFile)
+            BACKEND_URL
+            fetch(`${BACKEND_URL}/file`, requestOptionsFile)
                 .then(response => response.json())
 
 
@@ -239,7 +240,7 @@ export default {
                 body: JSON.stringify({"schema-name":this.schema.name,"values":this.values,"fileName":this.selectedFile.name,"fileId":rndstring})
             };
             
-            fetch("http://localhost:4242/form", requestOptions)
+            fetch(`${BACKEND_URL}/form`, requestOptions)
                 .then(response => response.json())
 
           }else{
@@ -249,7 +250,7 @@ export default {
                 body: JSON.stringify({"schema-name":this.schema.name,"values":this.values})
             };
             
-            fetch("http://localhost:4242/form", requestOptions)
+            fetch(`${BACKEND_URL}/form`, requestOptions)
                 .then(response => response.json())
 
           }
