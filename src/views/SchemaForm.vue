@@ -13,11 +13,15 @@
         <Map :lon="lon" :lat="lat" v-on:childToParent="onMarkerMoved"></Map>
       </div>
       <div>
+        <br /><br />
+        <input type="file" @change="onFileChanged">
         <b-form @submit.prevent="submit" v-show="addingLine" novalidate class="my-4">
             <div ref="container"></div>
             <b-button type="submit" variant="primary" :disabled="!hasValues">Valider la ligne</b-button>
         </b-form>
       </div>
+
+
     </div>
 </template>
 
@@ -54,7 +58,8 @@ export default {
           hasValues: false,
           fieldNodes: [],
           lat: 48.853,
-          lon: 2.35
+          lon: 2.35,
+          selectedFile: null
       }
   },
   watch: {
@@ -212,14 +217,42 @@ export default {
       submit() {
           let loader = this.$loading.show();
 
-          const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({"schema-name":this.schema.name,"values":this.values})
-          };
-          
-          fetch("http://localhost:4242/form", requestOptions)
-            .then(response => response.json())
+          if(this.selectedFile != null){
+                
+            const rndstring = this.rndStr(20)
+            const formData = new FormData()
+            formData.append('myFile', this.selectedFile, rndstring)
+
+
+            const requestOptionsFile = {
+                method: "POST",
+                body: formData
+            };
+            
+            fetch("http://localhost:4242/file", requestOptionsFile)
+                .then(response => response.json())
+
+
+            const requestOptions = {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({"schema-name":this.schema.name,"values":this.values,"fileName":this.selectedFile.name,"fileId":rndstring})
+            };
+            
+            fetch("http://localhost:4242/form", requestOptions)
+                .then(response => response.json())
+
+          }else{
+              const requestOptions = {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({"schema-name":this.schema.name,"values":this.values})
+            };
+            
+            fetch("http://localhost:4242/form", requestOptions)
+                .then(response => response.json())
+
+          }
 
 
           fetch(`${VALIDATA_API_URL}/validate`, {
@@ -268,6 +301,34 @@ export default {
         this.values['longitude'] = value[1]
         this.computeHasValues()
       },
+      onFileChanged (event) {
+        this.selectedFile = event.target.files[0]
+      },
+      onUpload() {
+            const formData = new FormData()
+            formData.append('myFile', this.selectedFile, "oioioi")
+            //axios.post('http://localhost4252/file', formData)
+
+
+          const requestOptions = {
+            method: "POST",
+            body: formData
+          };
+          
+          fetch("http://localhost:4242/form", requestOptions)
+            .then(response => response.json())
+
+
+      }, 
+      rndStr(len) {
+          let text = ""
+          let chars = "abcdefghijklmnopqrstuvwxyz"
+        
+        for( let i=0; i < len; i++ ) {
+            text += chars.charAt(Math.floor(Math.random() * chars.length))
+        }
+        return text
+      }
   }
 }
 </script>
