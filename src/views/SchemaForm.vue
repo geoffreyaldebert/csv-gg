@@ -83,6 +83,7 @@ export default {
   },
   mounted() {
       this.buildForm()
+      this.getposition()
       EventBus.$on('field-value-changed', (field, value) => {
           this.values[field] = value
           this.computeHasValues()
@@ -335,6 +336,8 @@ export default {
           if (navigator.geolocation) {
               navigator.geolocation.getCurrentPosition(
                   position => {
+                    console.log(position.coords.longitude)
+                    console.log(position.coords.latitude)
                     this.lon = position.coords.longitude;
                     this.lat = position.coords.latitude;
                   },
