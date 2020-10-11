@@ -1,7 +1,7 @@
 <template>
   <main>
-    <button v-on:click="flyto">Locate Me</button>
     <div id="map"></div>
+    <button v-on:click="flyto">Localisez-moi</button>
   </main>
 </template>
 
@@ -14,7 +14,7 @@ export default {
     // Set initial data, this.createMap() configures event listeners that update data based on user interaction
     return {
       center: [2.35, 48.853], // St. Paul
-      zoom: 10.5
+      zoom: 15
     };
   },
   mounted() {
