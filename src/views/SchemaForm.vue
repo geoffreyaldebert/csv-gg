@@ -78,6 +78,7 @@ export default {
           this.faultyFields = []
           // launch a new form build
           this.buildForm()
+          this.getposition()
       }
   },
   mounted() {
@@ -229,7 +230,7 @@ export default {
                 method: "POST",
                 body: formData
             };
-            BACKEND_URL
+
             fetch(`${BACKEND_URL}/file`, requestOptionsFile)
                 .then(response => response.json())
 
@@ -329,7 +330,25 @@ export default {
             text += chars.charAt(Math.floor(Math.random() * chars.length))
         }
         return text
-      }
+      },
+        getposition(){
+          if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                  position => {
+                    this.lon = position.coords.longitude;
+                    this.lat = position.coords.latitude;
+                  },
+                  function (error) {
+                      alert(error.message);
+                  }, {
+                      enableHighAccuracy: true
+                      , timeout: 5000
+                  }
+              );
+          } else {
+              alert("Geolocation is not supported by this browser.");
+          }
+        }
   }
 }
 </script>
