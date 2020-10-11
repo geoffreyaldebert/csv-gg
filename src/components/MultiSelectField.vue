@@ -5,6 +5,7 @@
             v-model="value"
             :options="options"
             buttons
+            stacked
             v-on:input="onInput" 
             :state="isValid" 
         ></b-form-checkbox-group>
